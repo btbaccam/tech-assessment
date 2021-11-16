@@ -2,15 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using CSharp.Models;
+using CSharp.Models.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 
 namespace CSharp
 {
@@ -26,7 +29,13 @@ namespace CSharp
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.AddScoped<IOrderRepository, OrderRepository>();
 			services.AddControllers();
+			services.AddDbContext<OrderContext>(o => o.UseSqlite("Data source=orders.db"));
+			services.AddSwaggerGen(c =>
+			{
+				c.SwaggerDoc("v1", new OpenApiInfo { Title = "CSharp", Version = "v1" });
+			});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -34,6 +43,8 @@ namespace CSharp
 		{
 			if (env.IsDevelopment())
 			{
+				app.UseSwagger();
+				app.UseSwaggerUI();
 				app.UseDeveloperExceptionPage();
 			}
 
